@@ -11,14 +11,21 @@ assignments.one = function(){
   //There's a problem with this function
   var buttons = $('button');
 
-  // No matter what I click, it always picks the same element
-  // could it be CLOSURES???
-  for (var i = 0; i < buttons.length; i++) {
+  // For this one let's set up a function to 
+  // assign a listener to a particular button
+  var setupButton = function(num){
+  	$(buttons[num]).on('click', function() {
+			$('#clicked-btn').text('You clicked button #' + num);
+		});
+  }
 
-    // somehow, i is always the same value
-     $(buttons[i]).on('click', function() {
-        $('#clicked-btn').text('You clicked button #' + i);
-     });
+  for (var i = 0; i < buttons.length; i++) {
+  	// Now make sure to pass i in as the num 
+  	// argument to our function. The problem was that 
+  	// in the closure, each button had a reference to i
+  	// but since i was being incremented it wasn't the proper
+  	// i for that particular instance.
+  	setupButton(i);
   }
 
 
@@ -31,25 +38,28 @@ ASSIGNMENT TWO: CHEER UP THE SAD VIKING VIA CLOSURE
 ********************************************* */
 
 assignments.two = function(){
+	
+	var cheerUp = function(viking){
+		viking.mood = "Happy!";
+		console.log("Cheered Up!")
+	}
+
+	// It looks like this particular problem was with using 'this'
+	//  prior to this fix, when 'this' was called it was set as the global window.
+	//  this obviously didn't change the mood. In this version though, this is being
+	//  preserved in the closure as 'viking' in the cheerUp function so the reference
+	//  now works properly.
 
   var viking = {  mood: undefined,
-                  cheerUp: ( function() {
-                          //This part works!
-                          //Otherwise, it would be undefined
-                          console.log('sad');
-                          this.mood = "sad.";
-                          $('#mood').text(this.mood);
+                  cheerUp: function(){
+										console.log('sad');
+										this.mood = "sad.";
+										$('#mood').text(this.mood);
 
-                          //So what goes wrong here?
-                          setTimeout( (function() {
-                            this.mood = "Happy!";
-
-                            //THIS even runs correctly!
-                            //What is UP with this? :(
-                            console.log("Cheered Up!")
-                          }), 1000);
-                      })
-           };
+										//So what goes wrong here?
+										setTimeout( cheerUp(this), 1000);
+									}
+								};
 
 
 
